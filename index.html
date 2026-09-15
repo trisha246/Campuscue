@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Your Week</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEBE1;
+    --paper-line: rgba(42,43,40,0.06);
+    --card:#FFFDF8;
+    --ink:#2A2B28;
+    --ink-soft:#6B6A62;
+    --ink-faint:#9C9A8F;
+    --indigo:#35407A;
+    --indigo-soft:#EEF0F8;
+    --danger:#B3432B;
+    --good:#1D6E4C;
+    --shadow-lift: 0 10px 30px rgba(42,43,40,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Plus Jakarta Sans', sans-serif;
+    color:var(--ink);
+    background:
+      repeating-linear-gradient(to bottom, transparent, transparent 27px, var(--paper-line) 27px, var(--paper-line) 28px),
+      var(--paper);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .handwritten{ font-family:'Kalam', cursive; }
+  a, button{ font-family:inherit; }
+  button{ cursor:pointer; }
+  *:focus-visible{ outline: 2px solid var(--indigo); outline-offset: 2px; }
+  input, select, textarea{ font-family:inherit; }
+
+  @keyframes rise{ from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform: translateY(0);} }
+  .fade-in{ opacity:0; animation: rise 0.5s ease forwards; }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px; }
+  .field input, .field select, .field textarea{
+    width:100%; border:1.5px solid var(--paper-line); background:#fff; border-radius:10px;
+    padding:11px 12px; font-size:14.5px; color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--indigo); }
+  .btn-primary, .btn-ghost, .btn-danger{ border:none; border-radius:10px; padding:12px 18px; font-size:14.5px; font-weight:700; width:100%; }
+  .btn-primary{ background:var(--indigo); color:#fff; transition: transform .15s ease; }
+  .btn-primary:hover{ transform: translateY(-1px); }
+  .btn-ghost{ background:var(--paper); color:var(--ink); }
+
+  /* ===================== ONBOARDING ===================== */
+  .onb-wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .onb-card{ width:100%; max-width:460px; background:var(--card); border-radius:20px; box-shadow:var(--shadow-lift); padding:32px 30px; }
+  .onb-brand{ text-align:center; margin-bottom:20px; }
+  .onb-brand .mark{ width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#4C5FB0,#C25B87); display:flex;align-items:center;justify-content:center; margin:0 auto 10px; }
+  .onb-brand .mark svg{ width:24px;height:24px; stroke:#fff; }
+  .onb-brand h1{ font-family:'Kalam',cursive; font-size:24px; margin:0; }
+  .onb-brand p{ color:var(--ink-soft); font-size:13px; margin:4px 0 0; }
+  .onb-progress{ display:flex; gap:6px; margin-bottom:22px; }
+  .onb-progress .seg{ flex:1; height:5px; border-radius:4px; background:var(--paper-line); overflow:hidden; }
+  .onb-progress .seg i{ display:block; height:100%; width:0%; background:var(--indigo); transition: width .3s ease; }
+  .onb-eyebrow{ font-size:12px; font-weight:700; color:var(--ink-faint); letter-spacing:0.3px; }
+  .onb-card h2{ font-family:'Kalam',cursive; font-size:26px; margin:4px 0 6px; }
+  .onb-card .sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:20px; }
+  .chip-grid{ display:flex; flex-wrap:wrap; gap:9px; margin-bottom:6px; }
+  .chip{ border:1.5px solid var(--paper-line); background:#fff; padding:9px 15px; border-radius:999px; font-size:13.5px; font-weight:600; color:var(--ink-soft); transition: all .15s ease; }
+  .chip.selected{ background:var(--indigo); border-color:var(--indigo); color:#fff; }
+  .chip.add-chip{ background:var(--paper); border-style:dashed; color:var(--ink-soft); }
+  .onb-actions{ display:flex; gap:10px; margin-top:24px; }
+  .onb-actions .btn-ghost, .onb-actions .btn-primary{ flex:1; }
+  .err-text{ color:var(--danger); font-size:12.5px; margin:-8px 0 14px; display:none; }
+  .err-text.show{ display:block; }
+
+  /* ===================== APP SHELL ===================== */
+  .app-shell{ min-height:100vh; }
+  .topbar{ position:sticky; top:0; z-index:15; background:var(--card); border-bottom:1px solid var(--paper-line); display:flex; align-items:center; justify-content:space-between; padding:14px 22px; flex-wrap:wrap; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:9px; }
+  .brand .mark{ width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4C5FB0,#C25B87); display:flex;align-items:center;justify-content:center; }
+  .brand .mark svg{ width:16px;height:16px; stroke:#fff; }
+  .brand span{ font-family:'Kalam',cursive; font-size:19px; }
+  .nav-pills{ display:flex; background:var(--paper); border-radius:999px; padding:3px; gap:2px; }
+  .nav-pills button{ border:none; background:transparent; padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .nav-pills button.active{ background:var(--indigo); color:#fff; }
+  .topbar-right{ display:flex; align-items:center; gap:10px; }
+  .avatar{ width:34px;height:34px;border-radius:50%; background:var(--indigo-soft); color:var(--indigo); display:flex;align-items:center;justify-content:center; font-weight:800; font-size:13.5px; }
+  .icon-btn{ border:1px solid var(--paper-line); background:#fff; border-radius:999px; width:34px;height:34px; display:flex;align-items:center;justify-content:center; }
+  .icon-btn svg{ width:15px;height:15px; }
+
+  .page{ max-width:1180px; margin:0 auto; padding:26px 20px 120px; }
+
+  .home-hero{ margin-bottom:22px; }
+  .home-hero h1{ font-family:'Kalam',cursive; font-size:36px; margin:0 0 6px; }
+  .home-hero .sub{ color:var(--ink-soft); font-size:14.5px; }
+  .home-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-bottom:26px; }
+  .hcard{ background:var(--card); border-radius:16px; padding:20px; box-shadow:var(--shadow-lift); }
+  .hcard .k{ font-size:12px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.4px; margin-bottom:8px; }
+  .hcard .v{ font-family:'Kalam',cursive; font-size:22px; }
+  .hcard .d{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+  .hcard.accent{ background:linear-gradient(135deg, #4C5FB0, #8C5A9E); color:#fff; }
+  .hcard.accent .k{ color:rgba(255,255,255,0.7); }
+  .hcard.accent .d{ color:rgba(255,255,255,0.85); }
+  .quick-links{ display:flex; gap:12px; flex-wrap:wrap; }
+  .qlink{ background:var(--card); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow-lift); display:flex; align-items:center; gap:10px; border:none; font-weight:700; font-size:14px; color:var(--ink); flex:1; min-width:160px; }
+  .qlink .dot-ic{ width:34px;height:34px;border-radius:10px; display:flex;align-items:center;justify-content:center; flex:none; }
+
+  .discover-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+  .dcard{ background:var(--card); border-radius:16px; padding:20px; box-shadow:var(--shadow-lift); border-top:4px solid var(--indigo); }
+  .dcard-icon{ width:32px;height:32px;border-radius:9px; display:flex;align-items:center;justify-content:center; font-weight:800; font-size:14px; margin-bottom:10px; font-family:'Kalam',cursive; }
+  .dcard h3{ font-family:'Kalam',cursive; font-size:19px; margin:0 0 8px; }
+  .dcard p{ font-size:13.5px; color:var(--ink-soft); line-height:1.55; margin:0; }
+
+  .profile-card{ background:var(--card); border-radius:18px; padding:26px; box-shadow:var(--shadow-lift); max-width:560px; }
+  .profile-top{ display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .profile-top .avatar{ width:56px;height:56px; font-size:20px; }
+  .profile-top h2{ font-family:'Kalam',cursive; font-size:24px; margin:0; }
+  .prow{ display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--paper-line); font-size:14px; }
+  .prow .k{ color:var(--ink-soft); }
+  .prow .v{ font-weight:700; text-align:right; max-width:60%; }
+  .ptags{ display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+  .ptag{ background:var(--indigo-soft); color:var(--indigo); font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .profile-actions{ display:flex; gap:10px; margin-top:22px; }
+
+  .sched-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:20px; }
+  .sched-head h1{ font-family:'Kalam',cursive; font-size:30px; margin:0 0 4px; }
+  .sched-sub{ color:var(--ink-soft); font-size:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .next-chip{ background:var(--indigo); color:#fff; padding:5px 12px; border-radius:999px; font-size:13px; font-weight:600; white-space:nowrap; }
+  .dot{ width:4px;height:4px;border-radius:50%;background:var(--ink-faint); }
+  .head-actions{ display:flex; align-items:center; gap:10px; }
+  .view-toggle{ display:flex; background:var(--card); border:1px solid var(--paper-line); border-radius:999px; padding:3px; box-shadow:0 2px 6px rgba(42,43,40,.06); }
+  .view-toggle button{ border:none;background:transparent;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;color:var(--ink-soft); }
+  .view-toggle button.active{ background:var(--indigo); color:#fff; }
+  .bell-btn{ border:1px solid var(--paper-line); background:var(--card); border-radius:999px; padding:9px 16px; font-size:13px; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:7px; box-shadow:0 2px 6px rgba(42,43,40,.06); }
+  .bell-btn svg{ width:15px;height:15px; }
+  .bell-btn.on{ color:var(--good); }
+  .bell-btn.on svg{ fill:var(--good); }
+
+  .board{ background:var(--card); border-radius:20px; box-shadow:var(--shadow-lift); overflow:hidden; }
+  .grid-scroll{ overflow-x:auto; }
+  .grid-inner{ min-width:780px; position:relative; }
+  .day-header-row{ display:grid; grid-template-columns:54px repeat(7,minmax(100px,1fr)); position:sticky; top:64px; background:var(--card); z-index:3; border-bottom:1px solid var(--paper-line); }
+  .day-header{ padding:14px 8px 12px; text-align:center; border-left:1px solid var(--paper-line); }
+  .day-header .dname{ font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .day-header .dnum{ font-size:18px; font-weight:700; margin-top:2px; }
+  .day-header.today{ background:var(--indigo-soft); }
+  .day-header.today .dname, .day-header.today .dnum{ color:var(--indigo); }
+  .time-grid{ display:grid; grid-template-columns:54px repeat(7,minmax(100px,1fr)); position:relative; }
+  .time-col{ position:relative; }
+  .time-label{ position:absolute; right:8px; transform:translateY(-50%); font-size:11px; color:var(--ink-faint); font-weight:600; }
+  .day-col{ position:relative; border-left:1px solid var(--paper-line); cursor:pointer; }
+  .day-col.today{ background:rgba(53,64,122,0.025); }
+  .hour-line{ position:absolute; left:0;right:0; border-top:1px solid var(--paper-line); }
+  .now-line{ position:absolute; left:0;right:0;height:0;border-top:2px solid var(--danger); z-index:2; }
+  .now-line::before{ content:''; position:absolute; left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:var(--danger); }
+  .class-block{ position:absolute; left:4px;right:4px; border-radius:8px; padding:6px 8px; overflow:hidden; text-align:left; border:none; box-shadow:0 1px 3px rgba(42,43,40,.12); transition: transform .15s ease, box-shadow .15s ease; }
+  .class-block:hover{ transform:translateY(-1px); box-shadow:0 4px 10px rgba(42,43,40,.18); z-index:5; }
+  .class-block .cb-subject{ font-family:'Kalam',cursive; font-weight:700; font-size:15px; line-height:1.1; margin-bottom:2px; }
+  .class-block .cb-meta{ font-size:10.5px; font-weight:600; opacity:.85; }
+  .empty-overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; text-align:center; }
+  .empty-overlay .box{ pointer-events:auto; }
+  .empty-overlay .handwritten{ font-size:24px; color:var(--ink-soft); margin-bottom:10px; }
+  .agenda{ display:flex; flex-direction:column; gap:18px; }
+  .agenda-day{ background:var(--card); border-radius:16px; box-shadow:var(--shadow-lift); padding:18px 20px; }
+  .agenda-day.today{ box-shadow:0 10px 30px rgba(53,64,122,.18); }
+  .agenda-day-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:12px; }
+  .agenda-day-head .handwritten{ font-size:22px; }
+  .agenda-day-head .adate{ font-size:13px; color:var(--ink-faint); font-weight:600; }
+  .agenda-item{ display:flex; align-items:center; gap:12px; padding:10px 4px; border-radius:10px; cursor:pointer; border:none; background:none; width:100%; text-align:left; }
+  .agenda-item:hover{ background:var(--paper-line); }
+  .agenda-bar{ width:5px; align-self:stretch; border-radius:4px; flex:none; }
+  .agenda-time{ font-size:12.5px; font-weight:700; color:var(--ink-soft); width:74px; flex:none; }
+  .agenda-info .subj{ font-family:'Kalam',cursive; font-weight:700; font-size:17px; }
+  .agenda-info .loc{ font-size:12.5px; color:var(--ink-soft); }
+  .agenda-empty{ color:var(--ink-faint); font-size:14px; padding:6px 4px; }
+
+  .fab{ position:fixed; bottom:26px; right:26px; background:linear-gradient(135deg,#4C5FB0,#8C5A9E); color:#fff; border:none; border-radius:999px; padding:15px 22px; font-size:15px; font-weight:700; box-shadow:0 10px 24px rgba(53,64,122,.4); display:flex; align-items:center; gap:8px; z-index:20; transition: transform .15s ease; }
+  .fab:hover{ transform:translateY(-2px); }
+  .fab svg{ width:16px;height:16px; }
+
+  .scrim{ position:fixed; inset:0; background:rgba(42,43,40,.35); z-index:30; opacity:0; pointer-events:none; transition: opacity .2s ease; }
+  .scrim.show{ opacity:1; pointer-events:auto; }
+  .panel{ position:fixed; top:0;right:0;bottom:0; width:min(420px,100vw); background:var(--card); z-index:31; box-shadow:-12px 0 40px rgba(0,0,0,.18); transform:translateX(100%); transition: transform .28s cubic-bezier(.2,.8,.3,1); overflow-y:auto; padding:24px 24px 40px; }
+  .panel.show{ transform:translateX(0); }
+  .panel h2{ font-family:'Kalam',cursive; font-size:26px; margin:0 0 20px; }
+  .row2{ display:flex; gap:12px; }
+  .row2 > div{ flex:1; }
+  .day-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:10px; }
+  .swatch{ width:30px;height:30px;border-radius:50%;border:2px solid transparent; position:relative; }
+  .swatch.selected::after{ content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--ink); }
+  .panel-actions{ display:flex; gap:10px; margin-top:24px; }
+  .btn-danger{ background:transparent; color:var(--danger); flex:none; padding:12px 14px; width:auto; }
+  .close-x{ position:absolute; top:20px;right:20px; border:none; background:none; font-size:20px; color:var(--ink-faint); line-height:1; }
+
+  .toast-stack{ position:fixed; bottom:26px; left:26px; display:flex; flex-direction:column; gap:10px; z-index:40; }
+  .toast{ background:var(--ink); color:#fff; padding:13px 16px; border-radius:12px; font-size:13.5px; max-width:300px; box-shadow:0 10px 24px rgba(0,0,0,.25); animation: toastIn .25s ease; }
+  .toast b{ font-family:'Kalam',cursive; font-size:15px; display:block; margin-bottom:2px; }
+  @keyframes toastIn{ from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+  .loading-state{ padding:80px 20px; text-align:center; color:var(--ink-faint); font-size:14px; }
+  .storage-banner{ background:#FBEEE8; color:#8A3B1F; border-bottom:1px solid rgba(138,59,31,0.15); font-size:12.5px; text-align:center; padding:9px 16px; }
+
+  @media (max-width: 640px){
+    .home-hero h1{ font-size:28px; }
+    .page{ padding:20px 14px 120px; }
+    .nav-pills button{ padding:7px 10px; font-size:12px; }
+    .brand span{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001s !important; transition-duration:.001s !important; } }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+(function(){
+  // ============================================================
+  // Constants
+  // ============================================================
+  const DAY_NAMES = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const DAY_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const PALETTE = ['#E1614A','#E2A23B','#6B8E4E','#2F8F87','#4C5FB0','#8C5A9E','#C25B87','#6B7280'];
+  const GRID_START_MIN = 7*60, GRID_END_MIN = 22*60, HOUR_PX = 60;
+
+  const YEAR_OPTIONS = ['1st Year','2nd Year','3rd Year','4th Year','5th Year','Postgraduate'];
+  const BRANCH_OPTIONS = ['Computer Science','Information Technology','Electronics','Electrical','Mechanical','Civil','Chemical','Biotech','Other'];
+  const INTEREST_OPTIONS = ['Coding','Design','Music','Sports','Photography','Robotics','Gaming','Reading','Startups','Volunteering','Debate','Dance','Film','Travel'];
+  const CATEGORY_OPTIONS = ['Campus Events','Internships','Hackathons','Scholarships','Placement Updates','Workshops','Clubs & Societies','Exam Updates','Sports Events','Cultural Fests'];
+
+  const DISCOVER_CONTENT = {
+    'Campus Events': "Check your college notice board, official app, or student-council social handles regularly — most campuses post events there first.",
+    'Internships': "Browse LinkedIn, Internshala, and your department's Training & Placement cell. Keep your resume updated every semester so you're ready to apply fast.",
+    'Hackathons': "Platforms like Devfolio, Unstop, and MLH list hackathons year-round. Following a few teammates or a club account is often the fastest way to hear about upcoming ones.",
+    'Scholarships': "The National Scholarship Portal and your college's financial aid office are good starting points — set a reminder around the start of each academic year.",
+    'Placement Updates': "Your Training & Placement cell's portal or mailing list is usually the official source — worth checking weekly during placement season.",
+    'Workshops': "Departmental notice boards, Coursera, and YouTube channels tied to your field are great for both on-campus and self-paced workshops.",
+    'Clubs & Societies': "Most clubs run active Instagram or WhatsApp broadcast channels — joining a couple in your interest areas keeps you in the loop with minimal effort.",
+    'Exam Updates': "Your college's exam cell page or official portal is the authoritative source — bookmark it and check before every exam cycle.",
+    'Sports Events': "Sports committee notice boards and the college sports app (if there is one) are the best place for fixtures and trials.",
+    'Cultural Fests': "Fest Instagram pages usually open registrations weeks in advance — following them early means you don't miss sign-ups."
+  };
+
+  // ============================================================
+  // State
+  // ============================================================
+  let storageOk = true;
+  let route = 'loading';     // loading | onboarding | home | schedule | discover | profile
+  let onbStep = 0;
+  let profile = null;        // { name, college, year, branch, interests, categories, onboardingDone }
+  let scheduleItems = [];
+  let scheduleView = 'grid';
+  let remindersOn = false;
+  let notifiedLog = new Set();
+  let onbData = { name:'', college:'', year:'', branch:'', branchOther:'', interests:new Set(), categories:new Set() };
+
+  const root = document.getElementById('root');
+  const $ = (id) => document.getElementById(id);
+
+  // ============================================================
+  // Utilities
+  // ============================================================
+  function escapeHtml(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
+  function uid(){ return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function timeToMin(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+  function minToLabel(min){ let h=Math.floor(min/60), m=min%60; const ampm=h>=12?'PM':'AM'; let h12=h%12; if(h12===0)h12=12; return m===0 ? (h12+' '+ampm) : (h12+':'+pad(m)+' '+ampm); }
+  function fmtRange(s,e){ return minToLabel(timeToMin(s))+' – '+minToLabel(timeToMin(e)); }
+  function fmtDateLong(d){ return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}); }
+  function fmtDateShort(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+  function todayIdx(){ return (new Date().getDay()+6)%7; }
+  function hexToRgba(hex,a){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; }
+  function initials(name){ return (name||'?').trim().split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase(); }
+  function tagColor(str){
+    let h = 0;
+    for(let i=0; i<str.length; i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+    return PALETTE[h % PALETTE.length];
+  }
+
+  function toast(title,msg){
+    const stack = $('toastStack');
+    const t = document.createElement('div');
+    t.className='toast';
+    t.innerHTML = `<b>${escapeHtml(title)}</b>${escapeHtml(msg)}`;
+    stack.appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400); }, 8000);
+  }
+
+  // ============================================================
+  // Storage layer — everything lives in PERSONAL storage (private
+  // to you), so no login is needed: it's just remembered for you.
+  // ============================================================
+  async function storageGet(key, shared){
+    try{ const r = await window.storage.get(key, shared); return r ? r.value : null; }
+    catch(e){ return null; }
+  }
+  async function storageSet(key, value, shared){
+    try{ const r = await window.storage.set(key, value, shared); return !!r; }
+    catch(e){ return false; }
+  }
+  async function getProfile(){ const v = await storageGet('profile', false); return v ? JSON.parse(v) : null; }
+  async function saveProfile(p){ return storageSet('profile', JSON.stringify(p), false); }
+  async function getSchedule(){ const v = await storageGet('schedule-items', false); return v ? JSON.parse(v) : []; }
+  async function saveSchedule(items){ return storageSet('schedule-items', JSON.stringify(items), false); }
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  async function boot(){
+    render();
+    try{
+      const probeKey='health-check';
+      const wrote = await storageSet(probeKey, String(Date.now()), false);
+      const readBack = wrote ? await storageGet(probeKey, false) : null;
+      storageOk = !!wrote && readBack != null;
+    }catch(e){ storageOk = false; }
+
+    profile = await getProfile();
+    if(profile && profile.onboardingDone){
+      scheduleItems = await getSchedule();
+      route = 'home';
+    }else{
+      route = 'onboarding';
+    }
+    render();
+  }
+
+  // ============================================================
+  // Router / render
+  // ============================================================
+  function storageBannerHtml(){
+    return storageOk ? '' : `<div class="storage-banner">Persistent storage isn't responding right now — you can still use the app, but data may not be saved after you close this tab.</div>`;
+  }
+
+  function render(){
+    if(route==='loading'){ root.innerHTML = `<div class="loading-state">Loading…</div>`; return; }
+    if(route==='onboarding'){ renderOnboarding(); return; }
+    renderAppShell();
+  }
+
+  // ---------------- ONBOARDING ----------------
+  const ONB_STEPS = ['name','college','year','branch','interests','categories'];
+
+  function renderOnboarding(){
+    const stepKey = ONB_STEPS[onbStep];
+    const total = ONB_STEPS.length;
+
+    let body = '';
+    if(stepKey==='name'){
+      body = `
+        <div class="onb-eyebrow">Step ${onbStep+1} of ${total}</div>
+        <h2>What should we call you?</h2>
+        <div class="sub">Just your name — no account needed.</div>
+        <div class="field">
+          <label for="oName">Name</label>
+          <input type="text" id="oName" placeholder="e.g. Aditi Sharma" value="${escapeHtml(onbData.name)}" />
+        </div>
+      `;
+    } else if(stepKey==='college'){
+      body = `
+        <div class="onb-eyebrow">Step ${onbStep+1} of ${total}</div>
+        <h2>Which college are you at?</h2>
+        <div class="sub">This helps us tailor tips to your campus.</div>
+        <div class="field">
+          <label for="oCollege">College name</label>
+          <input type="text" id="oCollege" placeholder="e.g. Delhi Technological University" value="${escapeHtml(onbData.college)}" />
+        </div>
+      `;
+    } else if(stepKey==='year'){
+      body = `
+        <div class="onb-eyebrow">Step ${onbStep+1} of ${total}</div>
+        <h2>What year are you in?</h2>
+        <div class="sub">Pick the one that fits right now.</div>
+        <div class="chip-grid" id="yearChips">
+          ${YEAR_OPTIONS.map(y=>`<button type="button" class="chip ${onbData.year===y?'selected':''}" data-y="${escapeHtml(y)}">${y}</button>`).join('')}
+        </div>
+      `;
+    } else if(stepKey==='branch'){
+      body = `
+        <div class="onb-eyebrow">Step ${onbStep+1} of ${total}</div>
+        <h2>What's your branch?</h2>
+        <div class="sub">Choose the closest match.</div>
+        <div class="chip-grid" id="branchChips">
+          ${BRANCH_OPTIONS.map(b=>`<button type="button" class="chip ${onbData.branch===b?'selected':''}" data-b="${escapeHtml(b)}">${b}</button>`).join('')}
+        </div>
+        ${onbData.branch==='Other' ? `
+        <div class="field" style="margin-top:14px;">
+          <label for="oBranchOther">Tell us your branch</label>
+          <input type="text" id="oBranchOther" placeholder="e.g. Aerospace Engineering" value="${escapeHtml(onbData.branchOther)}" />
+        </div>` : ''}
+      `;
+    } else if(stepKey==='interests'){
+      body = `
+        <div class="onb-eyebrow">Step ${onbStep+1} of ${total}</div>
+        <h2>What are you into?</h2>
+        <div class="sub">Pick as many as you like.</div>
+        <div class="chip-grid" id="interestChips">
+          ${INTEREST_OPTIONS.map(i=>{ const c=tagColor(i); const sel=onbData.interests.has(i); return `<button type="button" class="chip ${sel?'selected':''}" data-i="${escapeHtml(i)}" style="${sel?`background:${c};border-color:${c};`:''}">${i}</button>`; }).join('')}
+          <button type="button" class="chip add-chip" id="addInterest">+ Add your own</button>
+        </div>
+      `;
+    } else if(stepKey==='categories'){
+      body = `
+        <div class="onb-eyebrow">Step ${onbStep+1} of ${total}</div>
+        <h2>What should we keep you posted on?</h2>
+        <div class="sub">These shape your Discover tab.</div>
+        <div class="chip-grid" id="catChips">
+          ${CATEGORY_OPTIONS.map(c0=>{ const c=tagColor(c0); const sel=onbData.categories.has(c0); return `<button type="button" class="chip ${sel?'selected':''}" data-c="${escapeHtml(c0)}" style="${sel?`background:${c};border-color:${c};`:''}">${c0}</button>`; }).join('')}
+        </div>
+      `;
+    }
+
+    root.innerHTML = `
+      ${storageBannerHtml()}
+      <div class="onb-wrap">
+        <div class="onb-card fade-in">
+          ${onbStep===0 ? `
+          <div class="onb-brand">
+            <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></div>
+            <h1>Let's set up your week</h1>
+            <p>A few quick questions, then straight to your schedule.</p>
+          </div>` : ''}
+          <div class="onb-progress">
+            ${ONB_STEPS.map((s,i)=>`<div class="seg"><i style="width:${i<onbStep?100:(i===onbStep?50:0)}%"></i></div>`).join('')}
+          </div>
+          ${body}
+          <div class="onb-actions">
+            ${onbStep>0 ? `<button type="button" class="btn-ghost" id="onbBack">Back</button>` : ''}
+            <button type="button" class="btn-primary" id="onbNext">${onbStep===total-1 ? 'Finish' : 'Next'}</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if(stepKey==='name'){
+      $('oName').addEventListener('input', e=>{ onbData.name = e.target.value; });
+      setTimeout(()=>$('oName').focus(), 200);
+    }
+    if(stepKey==='college'){
+      $('oCollege').addEventListener('input', e=>{ onbData.college = e.target.value; });
+    }
+    if(stepKey==='year'){
+      $('yearChips').querySelectorAll('.chip').forEach(c=>{
+        c.addEventListener('click', ()=>{ onbData.year = c.dataset.y; renderOnboarding(); });
+      });
+    }
+    if(stepKey==='branch'){
+      $('branchChips').querySelectorAll('.chip').forEach(c=>{
+        c.addEventListener('click', ()=>{ onbData.branch = c.dataset.b; renderOnboarding(); });
+      });
+      const other = $('oBranchOther');
+      if(other) other.addEventListener('input', e=>{ onbData.branchOther = e.target.value; });
+    }
+    if(stepKey==='interests'){
+      $('interestChips').querySelectorAll('.chip[data-i]').forEach(c=>{
+        c.addEventListener('click', ()=>{
+          const v = c.dataset.i;
+          if(onbData.interests.has(v)) onbData.interests.delete(v); else onbData.interests.add(v);
+          renderOnboarding();
+        });
+      });
+      $('addInterest').addEventListener('click', ()=>{
+        const v = prompt('Add an interest');
+        if(v && v.trim()){ onbData.interests.add(v.trim()); renderOnboarding(); }
+      });
+    }
+    if(stepKey==='categories'){
+      $('catChips').querySelectorAll('.chip').forEach(c=>{
+        c.addEventListener('click', ()=>{
+          const v = c.dataset.c;
+          if(onbData.categories.has(v)) onbData.categories.delete(v); else onbData.categories.add(v);
+          renderOnboarding();
+        });
+      });
+    }
+
+    $('onbBack') && $('onbBack').addEventListener('click', ()=>{ onbStep--; renderOnboarding(); });
+    $('onbNext').addEventListener('click', onbNextStep);
+  }
+
+  async function onbNextStep(){
+    const stepKey = ONB_STEPS[onbStep];
+    if(stepKey==='name' && !onbData.name.trim()){ toast('Almost there', 'Enter your name to continue.'); return; }
+    if(stepKey==='college' && !onbData.college.trim()){ toast('Almost there', 'Enter your college name to continue.'); return; }
+    if(stepKey==='year' && !onbData.year){ toast('Almost there', 'Pick your year to continue.'); return; }
+    if(stepKey==='branch'){
+      if(!onbData.branch){ toast('Almost there', 'Pick a branch to continue.'); return; }
+      if(onbData.branch==='Other' && !onbData.branchOther.trim()){ toast('Almost there', 'Tell us your branch to continue.'); return; }
+    }
+    if(stepKey==='interests' && onbData.interests.size===0){ toast('Almost there', 'Pick at least one interest.'); return; }
+
+    if(onbStep < ONB_STEPS.length-1){
+      onbStep++;
+      renderOnboarding();
+    }else{
+      if(onbData.categories.size===0){ toast('Almost there', 'Pick at least one category to follow.'); return; }
+      const p = {
+        name: onbData.name.trim(),
+        college: onbData.college.trim(),
+        year: onbData.year,
+        branch: onbData.branch==='Other' ? onbData.branchOther.trim() : onbData.branch,
+        interests: [...onbData.interests],
+        categories: [...onbData.categories],
+        onboardingDone: true
+      };
+      const ok = await saveProfile(p);
+      profile = p;
+      if(!ok) toast('Heads up', "Couldn't save your profile fully — it may not persist after this tab closes.");
+      route = 'home';
+      render();
+      toast('All set', `Welcome aboard, ${p.name.split(' ')[0]}!`);
+    }
+  }
+
+  // ---------------- APP SHELL ----------------
+  function renderAppShell(){
+    root.innerHTML = `
+      <div class="app-shell">
+        ${storageBannerHtml()}
+        <div class="topbar">
+          <div class="brand">
+            <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></div>
+            <span>Your Week</span>
+          </div>
+          <div class="nav-pills" id="navPills">
+            <button data-r="home" class="${route==='home'?'active':''}">Home</button>
+            <button data-r="schedule" class="${route==='schedule'?'active':''}">Schedule</button>
+            <button data-r="discover" class="${route==='discover'?'active':''}">Discover</button>
+            <button data-r="profile" class="${route==='profile'?'active':''}">Profile</button>
+          </div>
+          <div class="topbar-right">
+            <div class="avatar">${initials(profile.name)}</div>
+          </div>
+        </div>
+        <div id="pageBody"></div>
+      </div>
+    `;
+    $('navPills').querySelectorAll('button').forEach(b=>{
+      b.addEventListener('click', ()=>{ route = b.dataset.r; render(); });
+    });
+
+    const body = $('pageBody');
+    if(route==='home') renderHome(body);
+    else if(route==='schedule') renderSchedulePage(body);
+    else if(route==='discover') renderDiscoverPage(body);
+    else if(route==='profile') renderProfilePage(body);
+  }
+
+  function nextClassInfo(){
+    const now = new Date();
+    const nowMin = now.getHours()*60+now.getMinutes();
+    const tIdx = todayIdx();
+    let best=null, bestDelta=Infinity;
+    scheduleItems.forEach(it=>{
+      for(let offset=0; offset<8; offset++){
+        const dIdx = (tIdx+offset)%7;
+        if(dIdx!==it.day) continue;
+        let delta;
+        if(offset===0){ delta = timeToMin(it.start)-nowMin; if(delta<0) continue; }
+        else{ delta = offset*1440 + timeToMin(it.start) - nowMin; }
+        if(delta<bestDelta){ bestDelta=delta; best=it; }
+        break;
+      }
+    });
+    return best ? {item:best, minutes:bestDelta} : null;
+  }
+
+  function renderHome(container){
+    const now = new Date();
+    const nc = nextClassInfo();
+    const todayCount = scheduleItems.filter(i=>i.day===todayIdx()).length;
+    let nextText = 'Nothing scheduled — add a class to get started.';
+    if(nc){
+      let when;
+      if(nc.minutes<60) when='in '+nc.minutes+'m';
+      else if(nc.minutes<1440) when='in '+Math.floor(nc.minutes/60)+'h '+(nc.minutes%60)+'m';
+      else when='in '+Math.floor(nc.minutes/1440)+'d';
+      nextText = nc.item.subject + ' ' + when;
+    }
+
+    container.innerHTML = `
+      <div class="page">
+        <div class="home-hero fade-in">
+          <h1>Hey ${escapeHtml(profile.name.split(' ')[0])} 👋</h1>
+          <div class="sub">${fmtDateLong(now)}${profile.college ? ' · '+escapeHtml(profile.college) : ''}</div>
+        </div>
+        <div class="home-cards fade-in">
+          <div class="hcard accent">
+            <div class="k">Next up</div>
+            <div class="v">${escapeHtml(nextText)}</div>
+            <div class="d">${nc && nc.item.location ? escapeHtml(nc.item.location) : ''}</div>
+          </div>
+          <div class="hcard" style="border-top:4px solid #E2A23B;">
+            <div class="k">Today</div>
+            <div class="v">${todayCount} class${todayCount===1?'':'es'}</div>
+            <div class="d">${DAY_NAMES[todayIdx()]}</div>
+          </div>
+          <div class="hcard" style="border-top:4px solid #2F8F87;">
+            <div class="k">Branch & Year</div>
+            <div class="v">${escapeHtml(profile.branch)}</div>
+            <div class="d">${escapeHtml(profile.year)}</div>
+          </div>
+        </div>
+        <div class="quick-links fade-in">
+          <button class="qlink" id="goSchedule"><span class="dot-ic" style="background:${hexToRgba('#4C5FB0',0.16)};color:#4C5FB0;">🗓️</span> Open schedule</button>
+          <button class="qlink" id="goDiscover"><span class="dot-ic" style="background:${hexToRgba('#C25B87',0.16)};color:#C25B87;">✨</span> See what's new for you</button>
+          <button class="qlink" id="goProfile"><span class="dot-ic" style="background:${hexToRgba('#6B8E4E',0.16)};color:#6B8E4E;">👤</span> Edit your profile</button>
+        </div>
+      </div>
+    `;
+    $('goSchedule').addEventListener('click', ()=>{ route='schedule'; render(); });
+    $('goDiscover').addEventListener('click', ()=>{ route='discover'; render(); });
+    $('goProfile').addEventListener('click', ()=>{ route='profile'; render(); });
+  }
+
+  function renderDiscoverPage(container){
+    const cats = (profile.categories && profile.categories.length) ? profile.categories : Object.keys(DISCOVER_CONTENT);
+    container.innerHTML = `
+      <div class="page">
+        <div class="home-hero fade-in">
+          <h1>Discover</h1>
+          <div class="sub">Quick tips based on what you follow — not live updates, just good starting points.</div>
+        </div>
+        <div class="discover-grid fade-in">
+          ${cats.map(c=>{ const col = tagColor(c); return `
+            <div class="dcard" style="border-top-color:${col}">
+              <div class="dcard-icon" style="background:${hexToRgba(col,0.16)};color:${col}">${(c[0]||'?').toUpperCase()}</div>
+              <h3 style="color:${col}">${escapeHtml(c)}</h3>
+              <p>${escapeHtml(DISCOVER_CONTENT[c] || "Keep an eye on your college's official channels for this one.")}</p>
+            </div>
+          `; }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderProfilePage(container){
+    container.innerHTML = `
+      <div class="page">
+        <div class="profile-card fade-in">
+          <div class="profile-top">
+            <div class="avatar">${initials(profile.name)}</div>
+            <div>
+              <h2>${escapeHtml(profile.name)}</h2>
+            </div>
+          </div>
+          <div class="prow"><div class="k">College</div><div class="v">${escapeHtml(profile.college)}</div></div>
+          <div class="prow"><div class="k">Year</div><div class="v">${escapeHtml(profile.year)}</div></div>
+          <div class="prow"><div class="k">Branch</div><div class="v">${escapeHtml(profile.branch)}</div></div>
+          <div class="prow"><div class="k">Interests</div><div class="v"><div class="ptags">${profile.interests.map(i=>`<span class="ptag" style="background:${hexToRgba(tagColor(i),0.16)};color:${tagColor(i)}">${escapeHtml(i)}</span>`).join('')}</div></div></div>
+          <div class="prow" style="border-bottom:none;"><div class="k">Following</div><div class="v"><div class="ptags">${profile.categories.map(c=>`<span class="ptag" style="background:${hexToRgba(tagColor(c),0.16)};color:${tagColor(c)}">${escapeHtml(c)}</span>`).join('')}</div></div></div>
+          <div class="profile-actions">
+            <button class="btn-ghost" id="editProfileBtn">Edit profile</button>
+          </div>
+        </div>
+      </div>
+    `;
+    $('editProfileBtn').addEventListener('click', ()=>{
+      onbData = {
+        name: profile.name, college: profile.college, year: profile.year,
+        branch: BRANCH_OPTIONS.includes(profile.branch) ? profile.branch : 'Other',
+        branchOther: BRANCH_OPTIONS.includes(profile.branch) ? '' : profile.branch,
+        interests: new Set(profile.interests), categories: new Set(profile.categories)
+      };
+      onbStep = 0;
+      route = 'onboarding';
+      render();
+    });
+  }
+
+  // ---------------- SCHEDULE PAGE ----------------
+  let editingId = null, selectedDays = new Set(), selectedColor = PALETTE[0];
+
+  function colorFor(subject){
+    const existing = scheduleItems.find(i=>i.subject.toLowerCase()===subject.toLowerCase());
+    if(existing) return existing.color;
+    const used = new Set(scheduleItems.map(i=>i.color));
+    const free = PALETTE.find(c=>!used.has(c));
+    return free || PALETTE[scheduleItems.length % PALETTE.length];
+  }
+
+  function renderSchedulePage(container){
+    container.innerHTML = `
+      <div class="page">
+        <div class="sched-head fade-in">
+          <div>
+            <h1>Your week</h1>
+            <div class="sched-sub" id="schedSub"></div>
+          </div>
+          <div class="head-actions">
+            <button class="bell-btn" id="bellBtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2.4 2.4 0 0 0 2.4-2.4h-4.8A2.4 2.4 0 0 0 12 22Zm7.2-6V11c0-3.5-1.9-6.4-5.2-7.2V3a2 2 0 1 0-4 0v.8C6.7 4.6 4.8 7.5 4.8 11v5l-1.8 1.8v1h18v-1L19.2 16Z"/></svg><span id="bellLabel">Reminders off</span></button>
+            <div class="view-toggle">
+              <button id="btnGrid" class="${scheduleView==='grid'?'active':''}">Grid</button>
+              <button id="btnAgenda" class="${scheduleView==='agenda'?'active':''}">Agenda</button>
+            </div>
+          </div>
+        </div>
+        <div id="schedContent"></div>
+      </div>
+      <button class="fab" id="fabAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add a class</button>
+      <div class="scrim" id="scrim"></div>
+      <div class="panel" id="panel">
+        <button class="close-x" id="closePanel">&times;</button>
+        <h2 id="panelTitle">Add a class</h2>
+        <form id="classForm">
+          <div class="field">
+            <label for="fSubject">Subject</label>
+            <input type="text" id="fSubject" list="subjectList" placeholder="e.g. Data Structures" required />
+            <datalist id="subjectList"></datalist>
+          </div>
+          <div class="field" id="dayField">
+            <label>Day<span id="dayHint"></span></label>
+            <div class="day-chips" id="dayChips"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="fStart">Starts</label><input type="time" id="fStart" required /></div>
+            <div class="field"><label for="fEnd">Ends</label><input type="time" id="fEnd" required /></div>
+          </div>
+          <div class="err-text" id="timeErr">End time should be after the start time.</div>
+          <div class="field"><label for="fLocation">Location (optional)</label><input type="text" id="fLocation" placeholder="e.g. Room 204, Block B" /></div>
+          <div class="field"><label>Color</label><div class="swatches" id="swatches"></div></div>
+          <div class="field"><label for="fNotify">Remind me</label>
+            <select id="fNotify">
+              <option value="0">No reminder</option>
+              <option value="5">5 minutes before</option>
+              <option value="10" selected>10 minutes before</option>
+              <option value="15">15 minutes before</option>
+              <option value="30">30 minutes before</option>
+              <option value="60">1 hour before</option>
+            </select>
+          </div>
+          <div class="field"><label for="fNotes">Notes (optional)</label><textarea id="fNotes" rows="2" placeholder="Bring lab manual, assignment due, etc."></textarea></div>
+          <div class="panel-actions">
+            <button type="button" class="btn-danger" id="deleteBtn" style="display:none;">Delete</button>
+            <button type="button" class="btn-ghost" id="cancelBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="saveBtn">Save class</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    $('btnGrid').addEventListener('click', ()=>{ scheduleView='grid'; renderSchedulePage(container); });
+    $('btnAgenda').addEventListener('click', ()=>{ scheduleView='agenda'; renderSchedulePage(container); });
+    $('fabAdd').addEventListener('click', ()=>openForm(null));
+    $('closePanel').addEventListener('click', closeForm);
+    $('cancelBtn').addEventListener('click', closeForm);
+    $('scrim').addEventListener('click', closeForm);
+    $('bellBtn').addEventListener('click', toggleReminders);
+    $('fSubject').addEventListener('change', e=>{
+      if(!editingId && e.target.value.trim()){ selectedColor = colorFor(e.target.value.trim()); buildSwatches(); }
+    });
+    $('deleteBtn').addEventListener('click', async ()=>{
+      if(!editingId) return;
+      scheduleItems = scheduleItems.filter(i=>i.id!==editingId);
+      await saveSchedule(scheduleItems);
+      closeForm(); renderSchedSub(); renderSchedBody();
+      toast('Removed', 'That class has been deleted.');
+    });
+    $('classForm').addEventListener('submit', handleClassSubmit);
+
+    updateBellUI();
+    renderSchedSub();
+    renderSchedBody();
+    renderSubjectList();
+  }
+
+  function renderSchedSub(){
+    const el = $('schedSub'); if(!el) return;
+    el.innerHTML='';
+    const now = new Date();
+    const dateSpan = document.createElement('span'); dateSpan.textContent = fmtDateLong(now); el.appendChild(dateSpan);
+    const todayCount = scheduleItems.filter(i=>i.day===todayIdx()).length;
+    if(todayCount>0){
+      el.appendChild(Object.assign(document.createElement('span'),{className:'dot'}));
+      const c=document.createElement('span'); c.textContent = todayCount+(todayCount===1?' class today':' classes today'); el.appendChild(c);
+    }
+    const nc = nextClassInfo();
+    if(nc){
+      el.appendChild(Object.assign(document.createElement('span'),{className:'dot'}));
+      const chip=document.createElement('span'); chip.className='next-chip';
+      let when;
+      if(nc.minutes<1) when='starting now';
+      else if(nc.minutes<60) when='in '+nc.minutes+'m';
+      else if(nc.minutes<1440) when='in '+Math.floor(nc.minutes/60)+'h '+(nc.minutes%60)+'m';
+      else when='in '+Math.floor(nc.minutes/1440)+'d';
+      chip.textContent = nc.item.subject+' '+when;
+      el.appendChild(chip);
+    }else if(scheduleItems.length){
+      el.appendChild(Object.assign(document.createElement('span'),{className:'dot'}));
+      const c=document.createElement('span'); c.textContent='No more classes this week 🎉'; el.appendChild(c);
+    }
+  }
+
+  function renderSubjectList(){
+    const dl = $('subjectList'); if(!dl) return;
+    dl.innerHTML='';
+    [...new Set(scheduleItems.map(i=>i.subject))].forEach(n=>{
+      const o=document.createElement('option'); o.value=n; dl.appendChild(o);
+    });
+  }
+
+  function renderSchedBody(){
+    const el = $('schedContent'); if(!el) return;
+    if(scheduleView==='grid') renderGrid(el); else renderAgenda(el);
+  }
+
+  function renderGrid(el){
+    const totalMin = GRID_END_MIN - GRID_START_MIN;
+    const gridHeight = totalMin/60*HOUR_PX;
+    const tIdx = todayIdx();
+    let html = `<div class="board fade-in"><div class="grid-scroll"><div class="grid-inner">`;
+    html += `<div class="day-header-row"><div></div>`;
+    const monday = new Date(); monday.setDate(monday.getDate()-tIdx);
+    for(let d=0; d<7; d++){
+      const dt = new Date(monday); dt.setDate(monday.getDate()+d);
+      html += `<div class="day-header ${d===tIdx?'today':''}"><div class="dname">${DAY_SHORT[d]}</div><div class="dnum">${dt.getDate()}</div></div>`;
+    }
+    html += `</div><div class="time-grid" style="height:${gridHeight}px"><div class="time-col">`;
+    for(let m=GRID_START_MIN; m<=GRID_END_MIN; m+=60){
+      const top=(m-GRID_START_MIN)/60*HOUR_PX;
+      html += `<div class="time-label" style="top:${top}px">${minToLabel(m)}</div>`;
+    }
+    html += `</div>`;
+    for(let d=0; d<7; d++){
+      html += `<div class="day-col ${d===tIdx?'today':''}" data-day="${d}" style="height:${gridHeight}px">`;
+      for(let m=GRID_START_MIN; m<=GRID_END_MIN; m+=60){
+        const top=(m-GRID_START_MIN)/60*HOUR_PX;
+        html += `<div class="hour-line" style="top:${top}px"></div>`;
+      }
+      if(d===tIdx){
+        const now=new Date(); const nowMin=now.getHours()*60+now.getMinutes();
+        if(nowMin>=GRID_START_MIN && nowMin<=GRID_END_MIN){
+          html += `<div class="now-line" style="top:${(nowMin-GRID_START_MIN)/60*HOUR_PX}px"></div>`;
+        }
+      }
+      scheduleItems.filter(i=>i.day===d).forEach(it=>{
+        const s=Math.max(timeToMin(it.start),GRID_START_MIN), e=Math.min(timeToMin(it.end),GRID_END_MIN);
+        if(e<=s) return;
+        const top=(s-GRID_START_MIN)/60*HOUR_PX, h=Math.max((e-s)/60*HOUR_PX,26);
+        html += `<button class="class-block" data-id="${it.id}" style="top:${top}px;height:${h}px;background:${hexToRgba(it.color,0.16)};border-left:4px solid ${it.color}">
+          <div class="cb-subject" style="color:${it.color}">${escapeHtml(it.subject)}</div>
+          <div class="cb-meta">${fmtRange(it.start,it.end)}${it.location?' · '+escapeHtml(it.location):''}</div>
+        </button>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+    if(scheduleItems.length===0){
+      html += `<div class="empty-overlay"><div class="box"><div class="handwritten">Your week's wide open.</div><button class="btn-primary" id="emptyAddBtn" style="padding:10px 20px;border-radius:10px;width:auto;">Add your first class</button></div></div>`;
+    }
+    html += `</div></div></div>`;
+    el.innerHTML = html;
+    el.querySelectorAll('.class-block').forEach(b=>b.addEventListener('click', ()=>openForm(b.dataset.id)));
+    el.querySelectorAll('.day-col').forEach(dc=>{
+      dc.addEventListener('click', ev=>{
+        if(ev.target.closest('.class-block')) return;
+        const rect = dc.getBoundingClientRect();
+        const y = ev.clientY - rect.top + dc.scrollTop;
+        let min = GRID_START_MIN + Math.round(y/HOUR_PX*60/15)*15;
+        min = Math.min(Math.max(min,GRID_START_MIN), GRID_END_MIN-30);
+        openForm(null, { day:Number(dc.dataset.day), start:min });
+      });
+    });
+    const eb = $('emptyAddBtn'); if(eb) eb.addEventListener('click', ()=>openForm(null));
+  }
+
+  function renderAgenda(el){
+    const tIdx = todayIdx();
+    const monday = new Date(); monday.setDate(monday.getDate()-tIdx);
+    let html = `<div class="agenda fade-in">`;
+    for(let d=0; d<7; d++){
+      const dt = new Date(monday); dt.setDate(monday.getDate()+d);
+      const dayItems = scheduleItems.filter(i=>i.day===d).sort((a,b)=>timeToMin(a.start)-timeToMin(b.start));
+      html += `<div class="agenda-day ${d===tIdx?'today':''}"><div class="agenda-day-head"><span class="handwritten">${DAY_NAMES[d]}</span><span class="adate">${fmtDateShort(dt)}</span></div>`;
+      if(dayItems.length===0) html += `<div class="agenda-empty">Nothing scheduled</div>`;
+      else dayItems.forEach(it=>{
+        html += `<button class="agenda-item" data-id="${it.id}"><div class="agenda-bar" style="background:${it.color}"></div><div class="agenda-time">${fmtRange(it.start,it.end)}</div><div class="agenda-info"><div class="subj" style="color:${it.color}">${escapeHtml(it.subject)}</div>${it.location?`<div class="loc">${escapeHtml(it.location)}</div>`:''}</div></button>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+    el.innerHTML = html;
+    el.querySelectorAll('.agenda-item').forEach(b=>b.addEventListener('click', ()=>openForm(b.dataset.id)));
+  }
+
+  function buildDayChips(){
+    const wrap = $('dayChips'); if(!wrap) return;
+    wrap.innerHTML='';
+    DAY_SHORT.forEach((label,idx)=>{
+      const chip=document.createElement('button');
+      chip.type='button'; chip.className='chip'+(selectedDays.has(idx)?' selected':'');
+      chip.textContent=label;
+      chip.addEventListener('click', ()=>{
+        if(editingId){ selectedDays = new Set([idx]); }
+        else{ if(selectedDays.has(idx)) selectedDays.delete(idx); else selectedDays.add(idx); }
+        buildDayChips();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+  function buildSwatches(){
+    const wrap = $('swatches'); if(!wrap) return;
+    wrap.innerHTML='';
+    PALETTE.forEach(c=>{
+      const sw=document.createElement('button');
+      sw.type='button'; sw.className='swatch'+(selectedColor===c?' selected':'');
+      sw.style.background=c;
+      sw.addEventListener('click', ()=>{ selectedColor=c; buildSwatches(); });
+      wrap.appendChild(sw);
+    });
+  }
+
+  function openForm(id, prefill){
+    editingId = id || null;
+    $('timeErr').classList.remove('show');
+    const form = $('classForm'); form.reset();
+    if(editingId){
+      const it = scheduleItems.find(i=>i.id===editingId);
+      $('panelTitle').textContent='Edit class';
+      $('fSubject').value=it.subject; $('fStart').value=it.start; $('fEnd').value=it.end;
+      $('fLocation').value=it.location||''; $('fNotify').value=String(it.notify); $('fNotes').value=it.notes||'';
+      selectedDays = new Set([it.day]); selectedColor = it.color;
+      $('deleteBtn').style.display='block'; $('dayHint').textContent='';
+    }else{
+      $('panelTitle').textContent='Add a class';
+      selectedDays = new Set(prefill && prefill.day!==undefined ? [prefill.day] : []);
+      selectedColor = PALETTE[scheduleItems.length % PALETTE.length];
+      $('deleteBtn').style.display='none'; $('dayHint').textContent=' (pick one or more)';
+      if(prefill && prefill.start!==undefined){
+        const h=Math.floor(prefill.start/60), m=prefill.start%60;
+        $('fStart').value = pad(h)+':'+pad(m);
+        const endMin = prefill.start+60;
+        $('fEnd').value = pad(Math.floor(endMin/60))+':'+pad(endMin%60);
+      }
+    }
+    buildDayChips(); buildSwatches();
+    $('scrim').classList.add('show'); $('panel').classList.add('show');
+    setTimeout(()=>$('fSubject').focus(),250);
+  }
+  function closeForm(){ $('scrim').classList.remove('show'); $('panel').classList.remove('show'); editingId=null; }
+
+  async function handleClassSubmit(e){
+    e.preventDefault();
+    const subject=$('fSubject').value.trim(), start=$('fStart').value, end=$('fEnd').value;
+    const location=$('fLocation').value.trim(), notify=Number($('fNotify').value), notes=$('fNotes').value.trim();
+    if(timeToMin(end)<=timeToMin(start)){ $('timeErr').classList.add('show'); return; }
+    $('timeErr').classList.remove('show');
+    if(selectedDays.size===0) selectedDays = new Set([todayIdx()]);
+    if(editingId){
+      const it = scheduleItems.find(i=>i.id===editingId);
+      it.subject=subject; it.start=start; it.end=end; it.location=location; it.notify=notify; it.notes=notes; it.color=selectedColor;
+      it.day=[...selectedDays][0];
+    }else{
+      selectedDays.forEach(d=>{
+        scheduleItems.push({ id:uid(), subject, day:d, start, end, location, notify, notes, color:selectedColor });
+      });
+    }
+    await saveSchedule(scheduleItems);
+    closeForm();
+    renderSchedSub(); renderSchedBody(); renderSubjectList();
+    toast('Saved', subject+' is on your schedule.');
+  }
+
+  function updateBellUI(){
+    const btn = $('bellBtn'); if(!btn) return;
+    btn.classList.toggle('on', remindersOn);
+    $('bellLabel').textContent = remindersOn ? 'Reminders on' : 'Reminders off';
+  }
+  async function toggleReminders(){
+    if(!('Notification' in window)){
+      remindersOn = !remindersOn; updateBellUI();
+      toast('Note', remindersOn ? "In-app reminders on. Your browser doesn't support push alerts." : 'Reminders turned off.');
+      return;
+    }
+    if(Notification.permission==='granted'){ remindersOn = !remindersOn; }
+    else if(Notification.permission==='denied'){
+      remindersOn = true;
+      toast('Notifications blocked', "Enable notifications for this site in your browser settings for alerts outside the tab. In-app reminders will still work.");
+    }else{
+      const perm = await Notification.requestPermission();
+      remindersOn = true;
+      if(perm!=='granted') toast('Notifications blocked', "You'll still get in-app reminders while this tab is open.");
+    }
+    updateBellUI();
+  }
+
+  function checkReminders(){
+    if(!remindersOn) return;
+    const now = new Date();
+    const nowMin = now.getHours()*60+now.getMinutes();
+    const dIdx = todayIdx();
+    const dateKey = now.toISOString().slice(0,10);
+    scheduleItems.forEach(it=>{
+      if(it.day!==dIdx || !it.notify) return;
+      const target = timeToMin(it.start)-it.notify;
+      const key = it.id+'-'+dateKey;
+      if(Math.abs(nowMin-target)<=0 && !notifiedLog.has(key)){
+        notifiedLog.add(key);
+        const body = `${it.subject} starts at ${minToLabel(timeToMin(it.start))}${it.location?' · '+it.location:''}`;
+        if('Notification' in window && Notification.permission==='granted'){
+          try{ new Notification('Upcoming class', { body }); }catch(e){}
+        }
+        toast('Upcoming class', body);
+      }
+    });
+  }
+
+  setInterval(()=>{
+    if(!profile) return;
+    checkReminders();
+    if(route==='schedule'){
+      renderSchedSub();
+      if(scheduleView==='grid'){
+        const nl=document.querySelector('.now-line');
+        if(nl){ const now=new Date(); const nowMin=now.getHours()*60+now.getMinutes(); if(nowMin>=GRID_START_MIN && nowMin<=GRID_END_MIN) nl.style.top=((nowMin-GRID_START_MIN)/60*HOUR_PX)+'px'; }
+      }
+    }
+    if(route==='home'){ renderHome($('pageBody')); }
+  }, 60000);
+
+  boot();
+})();
+</script>
+</body>
+</html>
